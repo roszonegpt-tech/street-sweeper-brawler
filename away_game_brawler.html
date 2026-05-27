@@ -368,7 +368,15 @@
     const TRIM_MIN_FRAC = 0.18;
     // padding inside the cell so the trimmed figure doesn't kiss the cell edges.
     const TRIM_PAD = 4;
+    // Some mobile Safari builds (older iPads especially) cap canvas dimensions
+    // at 4096 px. Our combiner already chroma-keys + trims at build time, so the
+    // runtime pass is just a safety net for hand-dropped atlases. Skip it when
+    // the image would force a too-big working canvas — the raw atlas is fine.
+    const MAX_TRIM_DIM = 4096;
     function autoTrimAtlas(img, cols, rows){
+        if(img.naturalWidth > MAX_TRIM_DIM || img.naturalHeight > MAX_TRIM_DIM){
+            return null; // signal "use the raw image as-is"
+        }
         const cw = Math.floor(img.naturalWidth / cols);
         const ch = Math.floor(img.naturalHeight / rows);
         // read source
@@ -3443,6 +3451,18 @@
         #agb-minimap{ position:fixed; right:14px; bottom:14px; width:140px; height:140px;
             background:rgba(20,12,6,.78); border:3px solid #ffd24a; border-radius:8px; z-index:5;
             box-shadow:0 4px 0 #1a1108; }
+        /* On touch devices the THROW/action buttons live in the same bottom-right
+           corner as the minimap. Move minimap to the top-right (under the wave
+           panel) and shrink slightly so the corner is left to the joystick/action
+           cluster. */
+        @media (max-width:900px), (pointer:coarse){
+            #agb-minimap{
+                right:10px; top:auto; bottom:auto; top:128px;
+                width:110px; height:110px;
+            }
+            /* power strip moves up too so it doesn't sit behind the joystick */
+            #agb-power-strip{ left:10px; bottom:auto !important; top:128px; }
+        }
         .agb-skin{ display:flex; flex-direction:column; align-items:center; padding:10px; gap:6px;
             border:3px solid #1a1108; border-radius:12px; background:#fff; cursor:pointer;
             box-shadow:0 4px 0 #1a1108; }
