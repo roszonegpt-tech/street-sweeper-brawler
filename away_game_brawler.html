@@ -249,8 +249,10 @@
             .abtn{ width:78px; height:78px; font-size:.9rem; }
             .act-cluster{ right:14px; gap:10px;
                           bottom:calc(20px + var(--sab)); }
-            .rot-cluster{ bottom:calc(108px + var(--sab)); right:18px; }
-            .rotbtn{ width:46px; height:46px; font-size:1.2rem; }
+            /* Hide rotate buttons on narrow portrait — they collide with
+               THROW/HIT, and rotation isn't needed for phone play. Re-enabled
+               at larger breakpoints (tablet/landscape). */
+            .rot-cluster{ display:none !important; }
 
             /* Top HUD: shrink panels so they don't eat half the screen. */
             #player-panel{ padding:6px 8px 6px 8px !important; }
@@ -363,12 +365,40 @@
     //  Sprite-based isometric brawler (Three.js r128)
     // ============================================================
 
+    // ---- On-screen error overlay ----
+    // On mobile Safari there's no devtools available to a typical player, so
+    // when something throws during init we currently get a silent gray screen.
+    // Catch every uncaught error and unhandled promise rejection, then paint a
+    // visible overlay with the message + first frame of the stack. Anyone
+    // hitting a problem can screenshot this instead of describing "it's gray".
+    (function installErrorOverlay(){
+        function show(msg){
+            try{
+                let o = document.getElementById('agb-fatal');
+                if(!o){
+                    o = document.createElement('div');
+                    o.id = 'agb-fatal';
+                    o.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99999;background:#7a1a00;color:#fff8e1;font:600 12px/1.4 ui-monospace,monospace;padding:14px 18px;max-height:55vh;overflow:auto;white-space:pre-wrap;border-bottom:4px solid #ffd24a;box-shadow:0 6px 18px rgba(0,0,0,.5);';
+                    document.body.appendChild(o);
+                }
+                o.textContent = (o.textContent ? o.textContent + '\n──────────\n' : '') + msg;
+            }catch(_){}
+        }
+        window.addEventListener('error', e => {
+            show('ERROR: ' + (e.message||'?') + '\n' + (e.error && e.error.stack ? e.error.stack.split('\n').slice(0,4).join('\n') : '(no stack)'));
+        });
+        window.addEventListener('unhandledrejection', e => {
+            const r = e.reason || {};
+            show('PROMISE REJECTED: ' + (r.message || r.toString ? r.toString() : '?'));
+        });
+    })();
+
     // ---- SPRITE ATLAS DATA (base64, injected) ----
     const SPRITE_DATA = {"blue": "away_game_brawler_files/blue.png", "red": "away_game_brawler_files/red.png", "black": "away_game_brawler_files/black.png", "hero": "away_game_brawler_files/hero.png", "hawks": "away_game_brawler_files/hawks.png", "knicks": "away_game_brawler_files/knicks.png"};
     const GAME_VERSION = "v1.0.1";
     // Bumped on atlas-format changes so cached browsers (iPad Safari especially)
     // refetch the new PNGs instead of mixing new code with stale image dimensions.
-    const ASSET_VER = "3";
+    const ASSET_VER = "4";
     const _asset = (url) => url.includes('?') ? url : url + '?v=' + ASSET_VER;
 
     // Sheet layouts. Each sheet: 8 rows = 8 facing directions (clockwise from South).
@@ -627,13 +657,10 @@
         shadows: !_isMobile,
         shadowType: THREE.PCFShadowMap,    // softer than PCFSoft, cheaper
     };
-    const renderer = new THREE.WebGLRenderer({
-        antialias: QUALITY.antialias,
-        powerPreference: 'high-performance',
-        // failIfMajorPerformanceCaveat:false lets the page still render with a
-        // SwiftShader fallback if hardware accel is unavailable.
-        failIfMajorPerformanceCaveat: false,
-    });
+    // NOTE: leave the constructor options minimal. Some iOS Safari builds
+    // reject `powerPreference:'high-performance'` and refuse to create the
+    // context (results in a gray screen and no thrown error). Only AA is set.
+    const renderer = new THREE.WebGLRenderer({ antialias: QUALITY.antialias });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(QUALITY.pixelRatio);
     renderer.shadowMap.enabled = QUALITY.shadows;
