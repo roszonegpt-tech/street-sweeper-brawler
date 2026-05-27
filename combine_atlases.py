@@ -20,7 +20,7 @@ from PIL import Image
 _HERE = os.path.dirname(os.path.abspath(__file__))
 IN_DIR  = os.path.join(_HERE, 'away_game_brawler_assets', 'New Characters Input')
 OUT_DIR = os.path.join(_HERE, 'away_game_brawler_assets', 'character_atlases')
-CELL = 256
+CELL = 128
 TARGET_COLS = 4   # each input panel is 4 frames wide (animation frames)
 TARGET_ROWS = 8   # engine expects 8 facings (S, SE, E, NE, N, NW, W, SW). When a
                   # source has fewer (e.g. AI drew only 6), cross-row fill copies

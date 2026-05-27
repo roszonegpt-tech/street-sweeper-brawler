@@ -319,7 +319,10 @@
     // Basketball enemies: 20 cols => idle(0-3) run(4-7) attack(8-11) hurt(12-15) death(16-19)
     // Hero atlas (core 16 + weapons 8 + throw 4 = 28 cols):
     //   idle(0-3) run(4-7) hurt(8-11) death(12-15) belt(16-19) broom(20-23) throw(24-27)
-    const CELL = 256, ROWS = 8;
+    // CELL halved from 256 → 128 so atlases stay ≤4096 px in every dimension
+    // (older iPad GPUs have a 4096 MAX_TEXTURE_SIZE; bigger atlases get silently
+    // downscaled or crash the tab). NearestFilter rendering looks identical.
+    const CELL = 128, ROWS = 8;
     const ENEMY_ANIMS = {
         idle:   { col:0,  len:4, fps:6,  loop:true  },
         run:    { col:4,  len:4, fps:12, loop:true  },
