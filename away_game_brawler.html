@@ -251,10 +251,38 @@
                           bottom:calc(20px + var(--sab)); }
             .rot-cluster{ bottom:calc(108px + var(--sab)); right:18px; }
             .rotbtn{ width:46px; height:46px; font-size:1.2rem; }
-            /* Push the minimap above the action cluster, sized down so it
-               doesn't cover gameplay. Lives in the upper-right under the HUD. */
-            #agb-minimap{ width:88px !important; height:88px !important;
-                          right:8px !important; top:118px !important; }
+
+            /* Top HUD: shrink panels so they don't eat half the screen. */
+            #player-panel{ padding:6px 8px 6px 8px !important; }
+            #player-panel .title-tag{ font-size:.95rem !important; }
+            #player-panel .num-shield{ width:30px !important; height:34px !important;
+                                       font-size:14px !important; top:4px !important; right:4px !important; }
+            #player-panel .hp-shell{ width:150px !important; height:14px !important; margin-top:4px !important; }
+            #player-panel .chip{ font-size:11px !important; padding:1px 7px !important; }
+            #player-panel #ult-wrap{ width:160px !important; height:9px !important; }
+            #player-panel #ult-label{ font-size:7px !important; }
+
+            /* Objective banner: move below the top HUD instead of overlapping it,
+               and shrink + wrap so it doesn't ride on top of the minimap. */
+            .agb-obj{ top:auto !important; bottom:calc(180px + var(--sab)) !important;
+                      max-width:88vw; font-size:11px !important;
+                      padding:5px 10px !important; }
+            .agb-obj .obj-bar{ width:50px !important; }
+
+            /* Minimap: smaller and tucked into a corner that won't fight the
+               objective banner or the action cluster. */
+            #agb-minimap{ width:78px !important; height:78px !important;
+                          right:8px !important; top:106px !important; }
+
+            /* Level-up card: stack the picks vertically so all three fit on a
+               narrow screen instead of clipping off the right edge. */
+            .agb-card{ padding:18px 16px !important; min-width:0 !important; max-width:92vw !important; }
+            .agb-card h1{ font-size:24px !important; }
+            .agb-card h2{ font-size:16px !important; margin-bottom:6px !important; }
+            .agb-grid{ grid-template-columns:1fr !important; gap:8px !important; }
+            .agb-pick{ padding:8px !important; }
+            .agb-pick .pname{ font-size:12px !important; }
+            .agb-pick .pdesc{ font-size:10px !important; }
         }
     </style>
 </head>
@@ -3131,6 +3159,15 @@
         document.getElementById('pause-btn').classList.add('show');
         startWaveObjective();
         hintHidden=false; const h=document.getElementById('hint'); h.style.opacity=1;
+        // Snap camera into position behind the player immediately so we don't
+        // get a brief "looking at the side of a building" view while the
+        // per-frame lerp is still settling.
+        const _px = STATE.player.mesh.position.x;
+        const _pz = STATE.player.mesh.position.z;
+        camera.position.x = _px + Math.cos(STATE.cameraAngle)*camDist;
+        camera.position.z = _pz + Math.sin(STATE.cameraAngle)*camDist;
+        camera.position.y = 24;
+        camera.lookAt(_px, 0, _pz);
     }
     document.getElementById('restart-btn').addEventListener('click',restartGame);
     document.getElementById('restart-btn').addEventListener('touchstart',e=>{e.preventDefault();restartGame();},{passive:false});
