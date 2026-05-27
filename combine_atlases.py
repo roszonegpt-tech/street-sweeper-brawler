@@ -15,10 +15,16 @@ rows from image height at load.
 import os
 from PIL import Image
 
-IN_DIR = r'C:\Users\q\Desktop\away_game_brawler_assets\New Characters Input'
-OUT_DIR = r'C:\Users\q\Desktop\away_game_brawler_assets\character_atlases'
+# Paths are relative to the script (the repo it lives in). Lets the script keep
+# working after the repo gets moved or cloned somewhere else.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+IN_DIR  = os.path.join(_HERE, 'away_game_brawler_assets', 'New Characters Input')
+OUT_DIR = os.path.join(_HERE, 'away_game_brawler_assets', 'character_atlases')
 CELL = 256
 TARGET_COLS = 4   # each input panel is 4 frames wide (animation frames)
+TARGET_ROWS = 8   # engine expects 8 facings (S, SE, E, NE, N, NW, W, SW). When a
+                  # source has fewer (e.g. AI drew only 6), cross-row fill copies
+                  # the nearest non-empty facing into the missing slots.
 PAD = 6           # px padding inside each output cell
 ALPHA_THRESH = 16 # pixel counts as content if alpha >= this
 # How much of the cell the trimmed figure should fill (height-wise). Anything
@@ -26,6 +32,10 @@ ALPHA_THRESH = 16 # pixel counts as content if alpha >= this
 # uniform across atlases regardless of how big the AI happened to draw them.
 TARGET_FILL = 0.86
 MAX_UPSCALE = 3.5
+# Cells smaller than this fraction of the cell area are treated as scrap and
+# replaced by a neighbor — kills the "tiny stray figure" artifacts the user saw
+# alongside legit figures.
+MIN_BBOX_FILL = 0.04
 
 JOBS = [
     ('celtics_0', [
@@ -321,20 +331,30 @@ def build_clean_panel(input_img, target_cols=4):
     if not row_bands:
         return Image.new('RGBA', (target_cols * CELL, CELL), (0, 0, 0, 0)), 1
 
-    rows = len(row_bands)
+    # Always allocate TARGET_ROWS so short sources get padded later by the
+    # cross-row fill pass. The first `len(row_bands)` rows hold detected art;
+    # rows beyond that start empty and are filled from neighbors below.
+    rows = max(len(row_bands), TARGET_ROWS)
     out = Image.new('RGBA', (target_cols * CELL, rows * CELL), (0, 0, 0, 0))
 
     for ri, (ry0, ry1) in enumerate(row_bands):
         # Detect columns within this row band so we work with the AI's actual layout
         # (some sources are 4 cols, others 6/7). Then normalize to target_cols by
-        # merging/splitting so the output is always a clean 4-frame anim panel.
+        # sampling so the output is always a clean 4-frame anim panel.
         col_bands = find_col_bands_in_row(img, ry0, ry1, target_cols)
+        # the source row band's pixel area — used to filter out scrap-sized bboxes
+        row_band_area = (ry1 - ry0 + 1) * (img.width // max(1, len(col_bands)))
         for ci, (cx0, cx1) in enumerate(col_bands):
             bbox = find_bbox(img, cx0, ry0, cx1 + 1, ry1 + 1)
             if not bbox:
                 continue
             bx0, by0, bx1, by1 = bbox
             bw, bh = bx1 - bx0, by1 - by0
+            # Skip cells whose content is tiny relative to the source cell area —
+            # these are usually overflow scraps from a neighbor figure that crept
+            # in past the col-band boundary.
+            if (bw * bh) < (row_band_area * MIN_BBOX_FILL):
+                continue
             avail_w = CELL - PAD * 2
             avail_h = CELL - PAD * 2
             # Target: figure's HEIGHT fills TARGET_FILL of cell height. Apply uniform
