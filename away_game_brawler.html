@@ -398,7 +398,7 @@
     const GAME_VERSION = "v1.0.1";
     // Bumped on atlas-format changes so cached browsers (iPad Safari especially)
     // refetch the new PNGs instead of mixing new code with stale image dimensions.
-    const ASSET_VER = "5";
+    const ASSET_VER = "6";
     const _asset = (url) => url.includes('?') ? url : url + '?v=' + ASSET_VER;
 
     // Sheet layouts. Each sheet: 8 rows = 8 facing directions (clockwise from South).
@@ -518,9 +518,6 @@
     function _loadAtlasOnce(name, url, timeoutMs){
         return new Promise((res) => {
             const img = new Image();
-            // crossOrigin matters for canvas getImageData inside autoTrimAtlas.
-            // GH Pages serves same-origin so this is a no-op there but is needed
-            // if the page is ever served from a different host than the assets.
             img.crossOrigin = 'anonymous';
             let done = false;
             const finish = (ok) => {
@@ -528,9 +525,15 @@
                 if(ok){
                     const cols = Math.max(1, Math.round(img.naturalWidth / CELL));
                     const rows = Math.max(1, Math.round(img.naturalHeight / CELL));
-                    const trimmed = autoTrimAtlas(img, cols, rows);
-                    const source = trimmed || img;
-                    const tex = new THREE.Texture(source);
+                    // Runtime auto-trim was here. Killed because:
+                    //  (a) the Python combine_atlases.py already produces clean,
+                    //      centered, padded cells offline.
+                    //  (b) it allocated a full-size duplicate canvas per atlas;
+                    //      9 atlases × ~14 MB = ~126 MB of CPU canvas memory,
+                    //      which on iPhone Safari pushed the WebGL context to
+                    //      OOM and caused shader compile to lose context.
+                    // Use the raw <img> directly as the texture source.
+                    const tex = new THREE.Texture(img);
                     tex.magFilter = THREE.NearestFilter;
                     tex.minFilter = THREE.NearestFilter;
                     tex.generateMipmaps = false;
