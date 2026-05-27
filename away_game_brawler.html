@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Street Sweeper Brawler</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -188,8 +190,11 @@
 
         /* ---------- MOBILE CONTROLS ---------- */
         #mobile-controls{ display:none; }
+        /* Safe-area-aware bottom inset so iOS Safari's home indicator bar doesn't
+           swallow the joystick / action buttons in portrait. */
+        :root{ --sab: env(safe-area-inset-bottom, 0px); }
         .joy-base{
-            position:absolute; bottom:26px; left:24px;
+            position:absolute; bottom:calc(26px + var(--sab)); left:24px;
             width:140px; height:140px; border-radius:50%;
             background:rgba(255,255,255,.12);
             border:3px solid rgba(255,255,255,.55);
@@ -203,7 +208,7 @@
             border:3px solid #fff; pointer-events:none;
         }
         .act-cluster{
-            position:absolute; bottom:30px; right:22px;
+            position:absolute; bottom:calc(30px + var(--sab)); right:22px;
             display:flex; flex-direction:column; gap:14px; align-items:center;
             pointer-events:none;
         }
@@ -225,12 +230,31 @@
             pointer-events:auto; touch-action:none;
         }
         .rot-cluster{
-            position:absolute; bottom:130px; right:30px;
+            position:absolute; bottom:calc(130px + var(--sab)); right:30px;
             display:flex; gap:12px; pointer-events:none;
         }
         @media (max-width:900px), (pointer:coarse){
             #mobile-controls{ display:block; }
-            #hint{ bottom:185px; }
+            #hint{ bottom:calc(185px + var(--sab)); }
+            /* Phone portrait: shrink controls a touch and move dev button up so it
+               doesn't sit on top of the joystick. */
+            #dev-btn{ bottom:calc(180px + var(--sab)) !important; left:8px !important; }
+        }
+        /* Narrow portrait (most phones): tighter sizes, action cluster pulled in
+           from the edge so THROW/HIT don't clip on rounded screen corners. */
+        @media (max-width:560px) and (orientation:portrait){
+            .joy-base{ width:120px; height:120px; left:16px;
+                       bottom:calc(20px + var(--sab)); }
+            .joy-knob{ width:54px; height:54px; }
+            .abtn{ width:78px; height:78px; font-size:.9rem; }
+            .act-cluster{ right:14px; gap:10px;
+                          bottom:calc(20px + var(--sab)); }
+            .rot-cluster{ bottom:calc(108px + var(--sab)); right:18px; }
+            .rotbtn{ width:46px; height:46px; font-size:1.2rem; }
+            /* Push the minimap above the action cluster, sized down so it
+               doesn't cover gameplay. Lives in the upper-right under the HUD. */
+            #agb-minimap{ width:88px !important; height:88px !important;
+                          right:8px !important; top:118px !important; }
         }
     </style>
 </head>
@@ -313,7 +337,11 @@
 
     // ---- SPRITE ATLAS DATA (base64, injected) ----
     const SPRITE_DATA = {"blue": "away_game_brawler_files/blue.png", "red": "away_game_brawler_files/red.png", "black": "away_game_brawler_files/black.png", "hero": "away_game_brawler_files/hero.png", "hawks": "away_game_brawler_files/hawks.png", "knicks": "away_game_brawler_files/knicks.png"};
-    const GAME_VERSION = "v1.0.0";
+    const GAME_VERSION = "v1.0.1";
+    // Bumped on atlas-format changes so cached browsers (iPad Safari especially)
+    // refetch the new PNGs instead of mixing new code with stale image dimensions.
+    const ASSET_VER = "2";
+    const _asset = (url) => url.includes('?') ? url : url + '?v=' + ASSET_VER;
 
     // Sheet layouts. Each sheet: 8 rows = 8 facing directions (clockwise from South).
     // Basketball enemies: 20 cols => idle(0-3) run(4-7) attack(8-11) hurt(12-15) death(16-19)
@@ -4294,10 +4322,10 @@
     // ---- BOOT ----
     async function boot(){
         const tasks=[
-            loadAtlas('blue', SPRITE_DATA.blue),
-            loadAtlas('red',  SPRITE_DATA.red),
-            loadAtlas('black',SPRITE_DATA.black),
-            loadAtlas('hero', SPRITE_DATA.hero),
+            loadAtlas('blue', _asset(SPRITE_DATA.blue)),
+            loadAtlas('red',  _asset(SPRITE_DATA.red)),
+            loadAtlas('black',_asset(SPRITE_DATA.black)),
+            loadAtlas('hero', _asset(SPRITE_DATA.hero)),
         ];
         // (knicks atlas removed — heavy_bball + fighter_f are the real recruits now,
         //  and the old knicks art had per-row vertical misalignment that produced the
@@ -4316,7 +4344,7 @@
             heavy_bball:'away_game_brawler_assets/character_atlases/heavy_bball.png',
             fighter_f:  'away_game_brawler_assets/character_atlases/fighter_f.png',
         };
-        for(const [n,u] of Object.entries(NEW_ROLE_ATLASES)) tasks.push(loadAtlas(n,u));
+        for(const [n,u] of Object.entries(NEW_ROLE_ATLASES)) tasks.push(loadAtlas(n, _asset(u)));
         await Promise.all(tasks);
         document.getElementById('loader').style.display='none';
         // load persistent best + progression
