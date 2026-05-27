@@ -249,10 +249,22 @@
             .abtn{ width:78px; height:78px; font-size:.9rem; }
             .act-cluster{ right:14px; gap:10px;
                           bottom:calc(20px + var(--sab)); }
-            /* Hide rotate buttons on narrow portrait — they collide with
-               THROW/HIT, and rotation isn't needed for phone play. Re-enabled
-               at larger breakpoints (tablet/landscape). */
-            .rot-cluster{ display:none !important; }
+            /* Rotate buttons: pulled out of the action-cluster stack and pinned
+               to the LEFT edge mid-screen so they don't collide with THROW/HIT
+               or the joystick. Vertical stack, smaller, semi-transparent. */
+            .rot-cluster{
+                left:8px !important; right:auto !important;
+                bottom:auto !important; top:50% !important;
+                transform:translateY(-50%) !important;
+                flex-direction:column !important;
+                gap:8px !important;
+            }
+            .rotbtn{
+                width:42px !important; height:42px !important;
+                font-size:1.1rem !important;
+                background:rgba(47,111,214,.65) !important;
+                border-width:2px !important;
+            }
 
             /* Top HUD: shrink panels so they don't eat half the screen. */
             #player-panel{ padding:6px 8px 6px 8px !important; }
