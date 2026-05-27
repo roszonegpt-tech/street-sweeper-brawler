@@ -398,7 +398,7 @@
     const GAME_VERSION = "v1.0.1";
     // Bumped on atlas-format changes so cached browsers (iPad Safari especially)
     // refetch the new PNGs instead of mixing new code with stale image dimensions.
-    const ASSET_VER = "4";
+    const ASSET_VER = "5";
     const _asset = (url) => url.includes('?') ? url : url + '?v=' + ASSET_VER;
 
     // Sheet layouts. Each sheet: 8 rows = 8 facing directions (clockwise from South).
@@ -515,18 +515,19 @@
         }
         return out;
     }
-    function loadAtlas(name, url){
+    function _loadAtlasOnce(name, url, timeoutMs){
         return new Promise((res) => {
             const img = new Image();
+            // crossOrigin matters for canvas getImageData inside autoTrimAtlas.
+            // GH Pages serves same-origin so this is a no-op there but is needed
+            // if the page is ever served from a different host than the assets.
+            img.crossOrigin = 'anonymous';
             let done = false;
             const finish = (ok) => {
                 if(done) return; done = true;
                 if(ok){
                     const cols = Math.max(1, Math.round(img.naturalWidth / CELL));
-                    // infer rows from height — supports 8-row originals and 6-row new sheets
                     const rows = Math.max(1, Math.round(img.naturalHeight / CELL));
-                    // run the trim pass — if it succeeds, use the trimmed canvas; on
-                    // CORS / canvas-taint failure, fall back to the raw image.
                     const trimmed = autoTrimAtlas(img, cols, rows);
                     const source = trimmed || img;
                     const tex = new THREE.Texture(source);
@@ -536,18 +537,24 @@
                     tex.needsUpdate = true;
                     TEX[name] = { texture: tex, cols, rows };
                 }
-                res();
+                res(ok);
             };
             img.onload  = () => finish(img.naturalWidth > 0);
-            // silent failure so an optional atlas missing on disk doesn't hang boot.
             img.onerror = () => finish(false);
-            // hard timeout — some setups (file://, server returning non-image content)
-            // never fire onload OR onerror, which would freeze the loader forever.
-            // 30s headroom: the auto-trim pass is synchronous JS and can be slow
-            // when many atlases load in parallel; we'd rather wait than drop one.
-            setTimeout(() => finish(false), 30000);
+            setTimeout(() => finish(false), timeoutMs);
             img.src = url;
         });
+    }
+    async function loadAtlas(name, url){
+        // First try with a generous 30s timeout; if that fails (flaky mobile
+        // network, slow first paint), retry once with 45s and a cache-bust on
+        // the URL so Safari doesn't replay the same failed request.
+        let ok = await _loadAtlasOnce(name, url, 30000);
+        if(!ok){
+            const retryUrl = url + (url.includes('?') ? '&' : '?') + 'r=' + Date.now();
+            ok = await _loadAtlasOnce(name, retryUrl, 45000);
+        }
+        return ok;
     }
 
     // ---- GAME STATE ----
@@ -4441,6 +4448,23 @@
         };
         for(const [n,u] of Object.entries(NEW_ROLE_ATLASES)) tasks.push(loadAtlas(n, _asset(u)));
         await Promise.all(tasks);
+        // ---- ESSENTIAL-atlas gate ----
+        // The game cannot create a player or any enemies without these. If any
+        // failed (mobile network glitch, CDN hiccup), show a recoverable error
+        // overlay instead of proceeding and crashing on first Character() call.
+        const ESSENTIAL = ['hero','blue','red','black'];
+        const missing = ESSENTIAL.filter(n => !TEX[n]);
+        if(missing.length){
+            const loader = document.getElementById('loader');
+            loader.innerHTML = `
+                <div style="text-align:center; padding:20px; max-width:90vw;">
+                    <div style="font-weight:900; color:#ffd24a; margin-bottom:12px; font-size:18px;">⚠️ Assets failed to load</div>
+                    <div style="font-size:13px; color:#fff8e1; line-height:1.5; margin-bottom:14px;">Missing: <b>${missing.join(', ')}</b><br>This is usually a flaky connection. Tap retry below.</div>
+                    <button id="agb-retry" style="background:linear-gradient(180deg,#ff8a3d,#d6402c);color:#fff;border:3px solid #1a1108;border-radius:999px;padding:10px 22px;font-weight:900;letter-spacing:1.5px;font-size:14px;box-shadow:0 4px 0 #1a1108;cursor:pointer;">RETRY</button>
+                </div>`;
+            document.getElementById('agb-retry').addEventListener('click', () => location.reload());
+            return;   // bail out of boot — no game until retry succeeds
+        }
         document.getElementById('loader').style.display='none';
         // load persistent best + progression
         try{ const b=parseInt(localStorage.getItem('agb_best')||'0',10); if(!isNaN(b)){ STATE.best=b; document.getElementById('best').innerText=b; } }catch(e){}
