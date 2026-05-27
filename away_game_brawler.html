@@ -340,7 +340,7 @@
     const GAME_VERSION = "v1.0.1";
     // Bumped on atlas-format changes so cached browsers (iPad Safari especially)
     // refetch the new PNGs instead of mixing new code with stale image dimensions.
-    const ASSET_VER = "2";
+    const ASSET_VER = "3";
     const _asset = (url) => url.includes('?') ? url : url + '?v=' + ASSET_VER;
 
     // Sheet layouts. Each sheet: 8 rows = 8 facing directions (clockwise from South).
@@ -584,12 +584,43 @@
     camera.position.set(20,22,20);
     camera.lookAt(0,0,0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias:true });
+    // ---- Device-tier quality ----
+    // Mobile GPUs (especially older iPads with the A10/A12 Bionic) choke on the
+    // combination of high pixel ratio + PCF soft shadows + antialias + the
+    // ~100 MB of atlas textures we ship. Detect touch/iPad and dial things
+    // down so the tab doesn't OOM into a gray-screen WebGL context loss.
+    const _isTouch = (window.matchMedia('(pointer:coarse)').matches) ||
+                     (navigator.maxTouchPoints > 1);
+    const _isiPad = /iPad|Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1;
+    const _isMobile = _isTouch || _isiPad;
+    const QUALITY = {
+        antialias: !_isMobile,
+        pixelRatio: _isMobile ? 1 : Math.min(window.devicePixelRatio, 2),
+        shadows: !_isMobile,
+        shadowType: THREE.PCFShadowMap,    // softer than PCFSoft, cheaper
+    };
+    const renderer = new THREE.WebGLRenderer({
+        antialias: QUALITY.antialias,
+        powerPreference: 'high-performance',
+        // failIfMajorPerformanceCaveat:false lets the page still render with a
+        // SwiftShader fallback if hardware accel is unavailable.
+        failIfMajorPerformanceCaveat: false,
+    });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(QUALITY.pixelRatio);
+    renderer.shadowMap.enabled = QUALITY.shadows;
+    renderer.shadowMap.type = QUALITY.shadowType;
     document.body.appendChild(renderer.domElement);
+    // If WebGL context is lost (out-of-memory crash on iPad), prevent the page
+    // from staying gray — show an error overlay so the user knows to refresh.
+    renderer.domElement.addEventListener('webglcontextlost', (e) => {
+        e.preventDefault();
+        const o = document.createElement('div');
+        o.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#1a1108;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;font:600 15px system-ui;';
+        o.innerHTML = '⚠️ Graphics context lost.<br>Tap to reload.';
+        o.onclick = () => location.reload();
+        document.body.appendChild(o);
+    });
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
     scene.add(ambientLight);
