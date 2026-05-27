@@ -1,0 +1,119 @@
+/* dev_menu.css — opt-in external stylesheet for dev_menu.js.
+   The JS file already injects these same rules at install time, so
+   you only need this file if you want to override the look or load
+   styles via a <link> tag (and pass { skipInjectStyles: true } to
+   installDevMenu so the JS doesn't double-inject). */
+
+#dev-btn {
+    position: fixed;
+    left: 10px;
+    bottom: 10px;
+    z-index: 9998;
+    font: 700 11px system-ui;
+    background: #1b1b22;
+    color: #7ee0ff;
+    border: 1px solid #7ee0ff;
+    border-radius: 6px;
+    padding: 5px 9px;
+    cursor: pointer;
+    opacity: .6;
+}
+#dev-btn:hover { opacity: 1; }
+
+#dev-panel {
+    position: fixed;
+    top: 0;
+    width: 330px;
+    max-height: 100vh;
+    overflow-y: auto;
+    z-index: 9999;
+    background: rgba(16, 16, 22, .96);
+    color: #e8e8ee;
+    font: 12px/1.35 system-ui;
+    padding: 10px 12px 40px;
+    display: none;
+    box-shadow: -6px 0 24px rgba(0, 0, 0, .5);
+}
+#dev-panel.dev-right { right: 0; border-left: 2px solid #7ee0ff; }
+#dev-panel.dev-left  { left: 0;  border-right: 2px solid #7ee0ff;
+                       box-shadow: 6px 0 24px rgba(0, 0, 0, .5); }
+#dev-panel.show { display: block; }
+
+#dev-panel h3 {
+    margin: 12px 0 5px;
+    font-size: 12px;
+    color: #7ee0ff;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    border-bottom: 1px solid #333;
+    padding-bottom: 3px;
+}
+#dev-panel h3:first-child { margin-top: 0; }
+
+#dev-panel button {
+    background: #262631;
+    color: #e8e8ee;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 5px 7px;
+    margin: 2px 2px 0 0;
+    cursor: pointer;
+    font: 600 11px system-ui;
+}
+#dev-panel button:hover { background: #34343f; border-color: #7ee0ff; }
+#dev-panel button.on    { background: #1d5e2e; border-color: #5fd07a; color: #bff5c8; }
+
+#dev-panel select,
+#dev-panel input[type=text],
+#dev-panel input[type=number] {
+    background: #1b1b22;
+    color: #e8e8ee;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 4px;
+    font: 11px system-ui;
+    width: 100%;
+    margin: 2px 0;
+}
+#dev-panel input[type=range] { width: 100%; }
+
+#dev-panel label {
+    display: block;
+    color: #aaa;
+    font-size: 10px;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+#dev-panel .row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#dev-lab-dirs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    margin-top: 6px;
+}
+#dev-lab-dirs canvas {
+    width: 100%;
+    background: #0c0c10;
+    border: 1px solid #333;
+    border-radius: 4px;
+    image-rendering: pixelated;
+}
+#dev-lab-dirs .dl { position: relative; }
+#dev-lab-dirs .dl span {
+    position: absolute;
+    top: 1px;
+    left: 3px;
+    font: 700 9px system-ui;
+    color: #7ee0ff;
+    text-shadow: 0 0 3px #000;
+}
+
+#dev-hint { color: #888; font-size: 10px; margin-top: 8px; }

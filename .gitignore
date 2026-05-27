@@ -1,0 +1,30 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Python build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Debug / scratch
+_dbg_*.png
+*.log
+
+# Build / temp output
+dist/
+build/
+.cache/
+
+# Large generated / backup blobs — keep out of git, not source of truth
+*.check.js
+*_backup.zip
+away_game_brawler_assets/away_game_brawler_v1.0.0_backup.zip
+_old_atlases/sprite_data.json
+
+# Browser-tab caches if you ever proxy via Vite/Webpack
+node_modules/

@@ -1,0 +1,8 @@
+Animation reference notes:
+- human and animals movements.pdf: use for basic motion cycles and body motion principles.
+- human walk.pdf: use for walk cycle timing, contact/down/pass/up poses, body bob, and arm-leg opposition.
+- punch and kick.pdf: use for punch and kick pose flow: anticipation, impact, follow-through, recovery, overshoot.
+- topdown walk run.pdf: use for top-down walk/run directions and 8-direction sprite layout ideas.
+- topdown movement.pdf: use for top-down run and attack motion structure.
+- Side Scroller ins.pdf: use for side-view walk, run, jump, shoot, and side-scroller game sprite organization.
+Do not copy the original artwork. Use these only as movement references.

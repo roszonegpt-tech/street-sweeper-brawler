@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Atlas Combiner — Away Game Brawler</title>
+<style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0; padding: 18px 22px 60px;
+        background: #15161c; color: #e7e7ee;
+        font: 13px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
+    }
+    h1 { margin: 0 0 4px; font-size: 18px; color: #7ee0ff; letter-spacing: .04em; }
+    .sub { color: #888; margin-bottom: 14px; }
+    .card {
+        background: #1d1f28; border: 1px solid #2c2f3b; border-radius: 8px;
+        padding: 12px 14px; margin-bottom: 14px;
+    }
+    .card h2 { margin: 0 0 6px; font-size: 13px; color: #ffd24a; letter-spacing: .06em; text-transform: uppercase; }
+    label { display: inline-block; min-width: 110px; color: #aab; }
+    input[type=text], select {
+        background: #0f1117; color: #e7e7ee; border: 1px solid #2c2f3b;
+        border-radius: 4px; padding: 4px 7px; font: 12px system-ui;
+    }
+    input[type=text] { width: 220px; }
+    button {
+        background: #2a2f3d; color: #e7e7ee; border: 1px solid #444a5c;
+        border-radius: 5px; padding: 6px 11px; font: 600 12px system-ui;
+        cursor: pointer; margin-right: 6px;
+    }
+    button:hover { background: #353c4d; border-color: #7ee0ff; }
+    button.primary { background: #1d5e2e; border-color: #5fd07a; color: #c8f5cf; }
+    button.danger  { background: #5e1d1d; border-color: #d05f5f; color: #f5c8c8; }
+    .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; margin-top: 8px; }
+    .slot {
+        background: #0f1117; border: 1px dashed #444a5c; border-radius: 6px;
+        padding: 8px; min-height: 110px; position: relative;
+    }
+    .slot.filled { border-style: solid; border-color: #5fd07a; }
+    .slot .label { font-weight: 700; color: #7ee0ff; font-size: 11px; letter-spacing: .04em; }
+    .slot .meta  { color: #888; font-size: 10px; margin-top: 2px; word-break: break-all; }
+    .slot canvas { width: 100%; image-rendering: pixelated; margin-top: 5px; background: #000; border-radius: 3px; }
+    .slot .x {
+        position: absolute; top: 4px; right: 4px; cursor: pointer;
+        color: #d05f5f; font-weight: 800; font-size: 12px;
+    }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .row + .row { margin-top: 6px; }
+    .preview-wrap {
+        background: #0f1117; border: 1px solid #2c2f3b; border-radius: 6px;
+        padding: 8px; overflow: auto; max-height: 380px;
+    }
+    .preview-wrap canvas { image-rendering: pixelated; background: #ff00ff; display: block; }
+    .pill { background: #2a2f3d; border-radius: 999px; padding: 2px 9px; color: #aab; font-size: 11px; }
+    .ok   { color: #5fd07a; }
+    .warn { color: #ffb14a; }
+    .err  { color: #ff6a6a; }
+    a.dl {
+        display: inline-block; padding: 7px 14px; background: #1d5e2e; color: #c8f5cf;
+        text-decoration: none; border-radius: 5px; font-weight: 700;
+    }
+    .help {
+        background: #1a2530; border-left: 3px solid #7ee0ff; padding: 8px 12px;
+        margin-bottom: 14px; color: #cde; font-size: 12px;
+    }
+    code { background: #0f1117; padding: 1px 5px; border-radius: 3px; color: #ffd24a; }
+</style>
+</head>
+<body>
+
+<h1>Atlas Combiner</h1>
+<div class="sub">Merge per-animation sprite sheets into one wide atlas PNG that the brawler engine can load.</div>
+
+<div class="help">
+    <b>How it works:</b> each input sheet must be <b>4 columns × 8 rows</b> (4 frames × 8 facings).
+    Drop one sheet into each anim slot. The tool stacks them horizontally in the order shown and exports a single PNG
+    of size <code>(cols × 256) × (8 × 256)</code>. Drop the result into <code>away_game_brawler_assets/character_atlases/</code>
+    using the suggested filename, then refresh the game.
+</div>
+
+<div class="card">
+    <h2>1 · Pick a preset</h2>
+    <div class="row">
+        <label>Character preset:</label>
+        <select id="preset">
+            <option value="enemy">Enemy / Mid-boss (20 cols — idle, run, attack, hurt, death)</option>
+            <option value="boss">Main Boss (24 cols — adds attack2)</option>
+            <option value="hero">Hero (28 cols — idle, run, hurt, death, belt, broom, throw)</option>
+        </select>
+        <button id="apply-preset">Apply</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+        <label>Output filename:</label>
+        <input type="text" id="outname" value="celtics_0.png">
+        <label style="min-width:60px;margin-left:14px">Facings:</label>
+        <select id="rows-pick">
+            <option value="auto">Auto-detect from first sheet</option>
+            <option value="6">6 facings (new AI sheets — 4×6)</option>
+            <option value="8">8 facings (original style — 4×8)</option>
+        </select>
+        <span class="pill" id="cell-info">cell 256 px</span>
+    </div>
+</div>
+
+<div class="card">
+    <h2>2 · Drop a sheet into each anim slot</h2>
+    <div class="sub" style="margin-bottom:4px">You can drag&amp;drop files onto slots, or click a slot to file-pick.
+        Each sheet should be 4×8 cells (any cell size — it'll be auto-rescaled to 256 px).</div>
+    <div class="slots" id="slots"></div>
+</div>
+
+<div class="card">
+    <h2>3 · Preview &amp; export</h2>
+    <div class="row">
+        <button class="primary" id="export-btn">Export merged atlas PNG</button>
+        <button id="rebuild-btn">Rebuild preview</button>
+        <button class="danger" id="clear-btn">Clear all slots</button>
+        <span id="status" class="pill"></span>
+    </div>
+    <div style="margin-top:10px" id="dl-wrap"></div>
+    <div class="preview-wrap" style="margin-top:10px">
+        <canvas id="preview"></canvas>
+    </div>
+</div>
+
+<script>
+const CELL = 256;
+// rows is now inferred from the FIRST loaded sheet (4×6 for new AI sheets, 4×8 for old).
+// You can override via the dropdown if auto-detection misreads.
+let ROWS = 6;
+
+// Anim layouts — must match the constants at the top of away_game_brawler.html.
+const PRESETS = {
+    enemy: { name:'enemy', slots: [
+        { key:'idle',   cols:4 },
+        { key:'run',    cols:4 },
+        { key:'attack', cols:4 },
+        { key:'hurt',   cols:4 },
+        { key:'death',  cols:4 },
+    ]},
+    boss: { name:'boss', slots: [
+        { key:'idle',    cols:4 },
+        { key:'run',     cols:4 },
+        { key:'attack',  cols:4 },
+        { key:'hurt',    cols:4 },
+        { key:'death',   cols:4 },
+        { key:'attack2', cols:4 },
+    ]},
+    hero: { name:'hero', slots: [
+        { key:'idle',  cols:4 },
+        { key:'run',   cols:4 },
+        { key:'hurt',  cols:4 },
+        { key:'death', cols:4 },
+        { key:'belt',  cols:4 },
+        { key:'broom', cols:4 },
+        { key:'throw', cols:4 },
+    ]},
+};
+
+let currentPreset = 'enemy';
+const slotData = {}; // key -> { img, name }
+
+function applyPreset() {
+    currentPreset = document.getElementById('preset').value;
+    for (const k of Object.keys(slotData)) delete slotData[k];
+    renderSlots();
+    document.getElementById('cell-info').textContent =
+        `${PRESETS[currentPreset].slots.length * 4} cols × ${ROWS} rows  ·  cell 256 px`;
+    redrawPreview();
+}
+
+function renderSlots() {
+    const wrap = document.getElementById('slots');
+    wrap.innerHTML = '';
+    for (const s of PRESETS[currentPreset].slots) {
+        const div = document.createElement('div');
+        div.className = 'slot' + (slotData[s.key] ? ' filled' : '');
+        div.dataset.key = s.key;
+        const entry = slotData[s.key];
+        div.innerHTML = `
+            <div class="label">${s.key.toUpperCase()}</div>
+            <div class="meta">${entry ? entry.name + ' · ' + entry.img.naturalWidth + '×' + entry.img.naturalHeight : 'drop a 4×8 sheet here'}</div>
+            ${entry ? '<canvas></canvas><span class="x" title="remove">×</span>' : ''}
+        `;
+        if (entry) {
+            const c = div.querySelector('canvas');
+            const max = 160;
+            const r = Math.min(max / entry.img.naturalWidth, (max * 1.5) / entry.img.naturalHeight);
+            c.width = entry.img.naturalWidth * r;
+            c.height = entry.img.naturalHeight * r;
+            c.getContext('2d').drawImage(entry.img, 0, 0, c.width, c.height);
+            div.querySelector('.x').onclick = (ev) => {
+                ev.stopPropagation();
+                delete slotData[s.key];
+                renderSlots(); redrawPreview();
+            };
+        }
+        div.addEventListener('dragover', ev => { ev.preventDefault(); div.style.background = '#243040'; });
+        div.addEventListener('dragleave', () => { div.style.background = ''; });
+        div.addEventListener('drop', ev => {
+            ev.preventDefault();
+            div.style.background = '';
+            const f = ev.dataTransfer.files[0];
+            if (f) loadFileIntoSlot(s.key, f);
+        });
+        div.addEventListener('click', () => {
+            const inp = document.createElement('input');
+            inp.type = 'file'; inp.accept = 'image/*';
+            inp.onchange = () => { if (inp.files[0]) loadFileIntoSlot(s.key, inp.files[0]); };
+            inp.click();
+        });
+        wrap.appendChild(div);
+    }
+}
+
+function loadFileIntoSlot(key, file) {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+        slotData[key] = { img, name: file.name };
+        // auto-detect row count from first loaded sheet: cell is square 256, so
+        // rows = round(height / (width/4)). 4×6 → 6, 4×8 → 8.
+        const pick = document.getElementById('rows-pick').value;
+        if (pick === 'auto') {
+            const guessCell = img.naturalWidth / 4;
+            ROWS = Math.max(1, Math.round(img.naturalHeight / guessCell));
+        } else {
+            ROWS = parseInt(pick, 10);
+        }
+        document.getElementById('cell-info').textContent =
+            `${PRESETS[currentPreset].slots.length * 4} cols × ${ROWS} rows · cell 256 px`;
+        renderSlots(); redrawPreview();
+    };
+    img.onerror = () => setStatus('Failed to load ' + file.name, 'err');
+    img.src = url;
+}
+
+function setStatus(msg, cls) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = 'pill ' + (cls || '');
+}
+
+function buildAtlasCanvas() {
+    const slots = PRESETS[currentPreset].slots;
+    const totalCols = slots.reduce((s, x) => s + x.cols, 0);
+    const W = totalCols * CELL, H = ROWS * CELL;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    // magenta key — keeps the artist-checkerboard look so empty slots are visible
+    ctx.fillStyle = '#ff00ff';
+    ctx.fillRect(0, 0, W, H);
+    let xCells = 0;
+    let filled = 0, missing = [];
+    for (const s of slots) {
+        const entry = slotData[s.key];
+        if (!entry) { missing.push(s.key); xCells += s.cols; continue; }
+        // each input is assumed to be its-own 4×8 grid; rescale to fit (s.cols × ROWS) cells of CELL px.
+        const dx = xCells * CELL, dy = 0;
+        const dw = s.cols * CELL, dh = ROWS * CELL;
+        ctx.drawImage(entry.img, 0, 0, entry.img.naturalWidth, entry.img.naturalHeight, dx, dy, dw, dh);
+        xCells += s.cols;
+        filled++;
+    }
+    return { canvas: cv, totalCols, filled, missing };
+}
+
+function redrawPreview() {
+    const { canvas, totalCols, filled, missing } = buildAtlasCanvas();
+    const pv = document.getElementById('preview');
+    // downscale preview for screen
+    const maxW = 1400;
+    const r = Math.min(1, maxW / canvas.width);
+    pv.width = canvas.width * r;
+    pv.height = canvas.height * r;
+    const ctx = pv.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(canvas, 0, 0, pv.width, pv.height);
+    if (missing.length) {
+        setStatus(`${filled}/${PRESETS[currentPreset].slots.length} filled — missing: ${missing.join(', ')}`, 'warn');
+    } else {
+        setStatus(`${totalCols}×${ROWS} cells · ${canvas.width}×${canvas.height} px · ready to export`, 'ok');
+    }
+}
+
+function exportPNG() {
+    const { canvas, missing } = buildAtlasCanvas();
+    if (missing.length) {
+        if (!confirm(`Missing slots: ${missing.join(', ')}.\nExport anyway? (gaps will show as magenta in-game)`)) return;
+    }
+    const name = (document.getElementById('outname').value || 'atlas.png').trim();
+    canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const wrap = document.getElementById('dl-wrap');
+        wrap.innerHTML = '';
+        const a = document.createElement('a');
+        a.className = 'dl';
+        a.href = url;
+        a.download = name;
+        a.textContent = `⬇  Download ${name}  (${canvas.width}×${canvas.height})`;
+        wrap.appendChild(a);
+        // also auto-trigger the download so it's one click total
+        a.click();
+        setStatus(`Exported ${name}`, 'ok');
+    }, 'image/png');
+}
+
+document.getElementById('apply-preset').onclick = applyPreset;
+document.getElementById('rebuild-btn').onclick = redrawPreview;
+document.getElementById('export-btn').onclick = exportPNG;
+document.getElementById('clear-btn').onclick = () => {
+    for (const k of Object.keys(slotData)) delete slotData[k];
+    renderSlots(); redrawPreview();
+};
+
+// init
+applyPreset();
+</script>
+</body>
+</html>

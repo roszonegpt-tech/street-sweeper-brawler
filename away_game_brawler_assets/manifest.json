@@ -1,0 +1,30 @@
+{
+  "source_game": "C:\\Users\\q\\Desktop\\away_game_brawler.html",
+  "note": "Full-size character atlases organized under character_atlases. Removed unwanted Knicks fan heavy/woman sheets and audits. Low-res prop/pickup files remain removed.",
+  "character_atlas_spec": {
+    "size": [
+      5120,
+      2048
+    ],
+    "cell": 256,
+    "cols": 20,
+    "rows": 8,
+    "actions": [
+      "idle",
+      "run",
+      "attack",
+      "hurt",
+      "death"
+    ]
+  },
+  "atlases": [
+    "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\character_atlases\\captain_black.png",
+    "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\character_atlases\\captain_blue.png",
+    "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\character_atlases\\captain_red.png",
+    "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\character_atlases\\heavy_archetype.png",
+    "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\character_atlases\\pedestrian_hoodie.png",
+    "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\character_atlases\\pedestrian_jacket.png",
+    "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\character_atlases\\rusher_archetype.png",
+    "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\character_atlases\\thrower_archetype.png"
+  ]
+}

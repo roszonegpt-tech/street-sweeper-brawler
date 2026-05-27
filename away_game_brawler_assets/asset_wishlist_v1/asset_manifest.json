@@ -1,0 +1,67 @@
+{
+  "root": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1",
+  "generated": "2026-05-22",
+  "style": "high-res cartoon sticker sprites, transparent PNG unless surface/title",
+  "throwables": {
+    "timberland_boot": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\throwables\\timberland_boot_5frame_strip_1280x256.png",
+    "basketball": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\throwables\\basketball_5frame_strip_1280x256.png",
+    "forty_oz_bottle": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\throwables\\forty_oz_bottle_5frame_strip_1280x256.png",
+    "trashcan_lid": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\throwables\\trashcan_lid_5frame_strip_1280x256.png",
+    "brick": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\throwables\\brick_5frame_strip_1280x256.png",
+    "metrocard_token": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\throwables\\metrocard_token_5frame_strip_1280x256.png"
+  },
+  "props": {
+    "fire_hydrant": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\props\\fire_hydrant_256.png",
+    "newsstand": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\props\\newsstand_256.png",
+    "trashcan": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\props\\trashcan_256.png",
+    "planter": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\props\\planter_256.png",
+    "lamp_post": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\props\\lamp_post_256.png",
+    "mailbox": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\props\\mailbox_256.png",
+    "pay_phone": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\props\\pay_phone_256.png",
+    "bus_stop": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\props\\bus_stop_256.png",
+    "awning": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\props\\awning_256.png"
+  },
+  "vehicles": {
+    "yellow_taxi": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\vehicles\\yellow_taxi_8dir_4frame_2048x3072.png",
+    "electric_car": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\vehicles\\electric_car_8dir_4frame_2048x3072.png",
+    "delivery_truck": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\vehicles\\delivery_truck_8dir_4frame_2048x3072.png",
+    "garbage_truck": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\vehicles\\garbage_truck_8dir_4frame_2048x3072.png",
+    "nypd_cruiser": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\vehicles\\nypd_cruiser_8dir_4frame_2048x3072.png",
+    "mta_bus": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\vehicles\\mta_bus_8dir_4frame_2048x3072.png",
+    "pizza_scooter": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\vehicles\\pizza_scooter_8dir_4frame_2048x3072.png"
+  },
+  "pickups": {
+    "sports_drink": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\pickups\\sports_drink_128.png",
+    "rage_flame": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\pickups\\rage_flame_128.png",
+    "speed_bolt": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\pickups\\speed_bolt_128.png",
+    "belt_weapon": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\pickups\\belt_weapon_128.png",
+    "broom_weapon": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\pickups\\broom_weapon_128.png",
+    "pizza_slice": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\pickups\\pizza_slice_128.png",
+    "hot_dog": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\pickups\\hot_dog_128.png"
+  },
+  "surfaces": {
+    "asphalt": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\surfaces\\asphalt_512_tile.png",
+    "sidewalk": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\surfaces\\sidewalk_512_tile.png",
+    "brick_red": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\surfaces\\brick_red_512_tile.png",
+    "brick_tan": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\surfaces\\brick_tan_512_tile.png",
+    "concrete_graffiti": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\surfaces\\concrete_graffiti_512_tile.png",
+    "awning_stripes": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\surfaces\\awning_stripes_512_tile.png"
+  },
+  "fx": {
+    "pow_words": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\fx\\pow_words_sheet.png",
+    "spark": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\fx\\spark_sheet.png",
+    "hit_ring": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\fx\\hit_ring_sheet.png",
+    "smoke_puff": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\fx\\smoke_puff_sheet.png",
+    "sweat_drop": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\fx\\sweat_drop_sheet.png",
+    "confetti": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\fx\\confetti_sheet.png",
+    "slowmo_flash": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\fx\\slowmo_flash_1920x1080.png"
+  },
+  "title_art": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\ui\\title\\title_screen_nyc_1920x1080.png",
+  "portraits": {
+    "portrait_1": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\ui\\portraits\\portrait_1_96.png",
+    "portrait_2": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\ui\\portraits\\portrait_2_96.png",
+    "portrait_3": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\ui\\portraits\\portrait_3_96.png",
+    "portrait_4": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\ui\\portraits\\portrait_4_96.png",
+    "portrait_5": "C:\\Users\\q\\Desktop\\away_game_brawler_assets\\asset_wishlist_v1\\ui\\portraits\\portrait_5_96.png"
+  }
+}
